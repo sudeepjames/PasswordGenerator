@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memorable Password Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Password Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
     body {
         font-family: "Exo 2", sans-serif;
         background: linear-gradient(-45deg, #f0f2f5, #c8d6e5, #a3bce6, #f0f2f5);
@@ -14,8 +16,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
+        padding: 20px;
     }
 
     @keyframes gradientBG {
@@ -30,106 +33,282 @@
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         text-align: center;
-        width: 500px;
+        width: 520px;
+        max-width: 100%;
     }
 
     h1 {
-        margin-bottom: 20px;
+        margin: 0 0 24px 0;
         color: #333;
+        font-size: 1.5rem;
+    }
+
+    /* Mode toggle */
+    .mode-toggle {
+        display: flex;
+        background: #f0f2f5;
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 24px;
+        gap: 4px;
+    }
+
+    .mode-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: #666;
+        font-family: "Exo 2", sans-serif;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: none;
+        margin: 0;
+    }
+
+    .mode-btn.active {
+        background: #4f6ff8;
+        color: white;
+        box-shadow: 0 2px 8px rgba(79,111,248,0.35);
+    }
+
+    .mode-btn:hover:not(.active) {
+        background: #e0e4f0;
+        color: #333;
+        transform: none;
+    }
+
+    /* Options panels */
+    .options-panel {
+        display: none;
+        animation: fadeIn 0.2s ease;
+    }
+    .options-panel.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .option-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        margin-bottom: 12px;
+    }
+
+    .option-row label {
+        margin: 0;
+        color: #444;
+        font-size: 0.95rem;
     }
 
     input[type="number"] {
-        width: 60px;
-        padding: 5px;
-        margin-right: 10px;
+        width: 64px;
+        padding: 5px 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-family: "Exo 2", sans-serif;
+        font-size: 0.9rem;
+        text-align: center;
     }
 
-    label {
-        margin-right: 10px;
+    input[type="checkbox"] {
+        accent-color: #4f6ff8;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
     }
 
-#password {
-    margin-top: 20px;
-    font-weight: bold;
-    word-break: break-word;
-    cursor: pointer;
-    padding: 15px;          /* increased padding */
-    font-size: 1.5rem;      /* bigger text */
-    background: #f1f1f1;
-    border-radius: 8px;
-    user-select: none;
-}
+    /* Checkbox labels */
+    .check-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        user-select: none;
+    }
 
+    /* Password display */
+    #password {
+        margin-top: 20px;
+        font-weight: bold;
+        word-break: break-all;
+        cursor: pointer;
+        padding: 16px 20px;
+        font-size: 1.4rem;
+        background: #f1f1f1;
+        border-radius: 8px;
+        user-select: none;
+        transition: background 0.15s ease;
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.4;
+        position: relative;
+    }
+
+    #password:hover {
+        background: #e6e8f0;
+    }
+
+    #password .copy-hint {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        font-size: 0.65rem;
+        font-weight: 500;
+        color: #aaa;
+        letter-spacing: 0.04em;
+    }
 
     .strength-label {
         margin-top: 10px;
-        font-weight: bold;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #555;
     }
 
     .strength-bar-container {
-        margin-top: 5px;
+        margin-top: 6px;
         background: #ddd;
         border-radius: 6px;
         overflow: hidden;
-        height: 10px;
+        height: 8px;
     }
 
     .strength-bar {
         height: 100%;
         width: 0%;
         background: red;
-        transition: width 0.3s ease, background 0.3s ease;
+        transition: width 0.35s ease, background 0.35s ease;
     }
 
-    button {
-        margin-top: 15px;
-        padding: 10px 20px;
+    /* Generate button */
+    .generate-btn {
+        margin-top: 18px;
+        padding: 11px 28px;
         border: none;
         border-radius: 8px;
         background: #4f6ff8;
         color: white;
+        font-family: "Exo 2", sans-serif;
         font-weight: 600;
+        font-size: 1rem;
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         transition: background 0.2s ease, transform 0.1s ease;
     }
-    button:hover {
-        background: #3c59dc;
+    .generate-btn:hover { background: #3c59dc; }
+    .generate-btn:active { transform: scale(0.97); }
+
+    .notice {
+        margin-top: 16px;
+        font-size: 0.82rem;
+        color: #888;
+        line-height: 1.5;
     }
-    button:active {
-        transform: scale(0.97);
+
+    /* Copy flash */
+    .copied-flash {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: #333;
+        color: #fff;
+        padding: 9px 20px;
+        border-radius: 20px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .copied-flash.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Memorable Password Generator</h1>
-    <div>
-        <label for="numWords">Words:</label>
-        <input type="number" id="numWords" value="3" min="2" max="8">
-    </div>
-    <div style="margin-top:10px;">
-        <input type="checkbox" id="capitalize" checked>
-        <label for="capitalize">Capitalize Words</label>
-        <input type="checkbox" id="addNumber">
-        <label for="addNumber">Add Number</label>
-        <input type="checkbox" id="addSymbol">
-        <label for="addSymbol">Add Symbol</label>
+    <h1>Password Generator</h1>
+
+    <!-- Mode toggle -->
+    <div class="mode-toggle">
+        <button class="mode-btn active" id="btnMemorable" onclick="setMode('memorable')">🧠 Memorable</button>
+        <button class="mode-btn" id="btnRandom" onclick="setMode('random')">🎲 Random</button>
     </div>
 
-    <button onclick="generatePassword()">Generate Again</button>
+    <!-- Memorable options -->
+    <div class="options-panel active" id="panelMemorable">
+        <div class="option-row">
+            <label for="numWords">Words:</label>
+            <input type="number" id="numWords" value="3" min="2" max="8">
+        </div>
+        <div class="option-row">
+            <label class="check-label">
+                <input type="checkbox" id="capitalize" checked> Capitalize
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="addNumber"> Add Number
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="addSymbol"> Add Symbol
+            </label>
+        </div>
+    </div>
 
-    <div id="password" onclick="copyPassword()">Click to Copy</div>
+    <!-- Random options -->
+    <div class="options-panel" id="panelRandom">
+        <div class="option-row">
+            <label for="pwLength">Length:</label>
+            <input type="number" id="pwLength" value="16" min="6" max="64">
+        </div>
+        <div class="option-row">
+            <label class="check-label">
+                <input type="checkbox" id="rndUpper" checked> Uppercase
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="rndLower" checked> Lowercase
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="rndNumber" checked> Numbers
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="rndSymbol"> Symbols
+            </label>
+        </div>
+    </div>
+
+    <button class="generate-btn" onclick="generatePassword()">⟳ Generate</button>
+
+    <div id="password" onclick="copyPassword()">
+        <span class="copy-hint">click to copy</span>
+        <span id="pwText">—</span>
+    </div>
+
     <div class="strength-label" id="strengthLabel"></div>
     <div class="strength-bar-container">
         <div class="strength-bar" id="strengthBar"></div>
     </div>
-    <div style="text-align:center; margin-top:15px; font-size:0.9rem; color:#555;">
-    Your data is safe. This tool runs completely client-side. No data leaves your browser. Click on the generated password and it will be copied to the Clipboard.
+
+    <div class="notice">
+        🔒 Runs 100% client-side. No data leaves your browser.
+    </div>
 </div>
-</div>
-<!-- Safety notice -->
+
+<div class="copied-flash" id="copiedFlash">✓ Copied to clipboard!</div>
 
 <script>
 const wordList = [
@@ -218,48 +397,109 @@ const wordList = [
 "world","worry","would","write","writer","wrong","yard","year","yes","yet","you","young","your","yourself"
 ];
 
+let currentMode = 'memorable';
+
+// Elements
+const pwText = document.getElementById('pwText');
+const strengthBar = document.getElementById('strengthBar');
+const strengthLabel = document.getElementById('strengthLabel');
+
+// Memorable inputs
 const numWordsInput = document.getElementById('numWords');
 const capitalizeInput = document.getElementById('capitalize');
 const addNumberInput = document.getElementById('addNumber');
 const addSymbolInput = document.getElementById('addSymbol');
-const passwordDiv = document.getElementById('password');
-const strengthBar = document.getElementById('strengthBar');
-const strengthLabel = document.getElementById('strengthLabel');
 
-function generatePassword() {
-    const numWords = parseInt(numWordsInput.value);
+// Random inputs
+const pwLengthInput = document.getElementById('pwLength');
+const rndUpper = document.getElementById('rndUpper');
+const rndLower = document.getElementById('rndLower');
+const rndNumber = document.getElementById('rndNumber');
+const rndSymbol = document.getElementById('rndSymbol');
+
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('btnMemorable').classList.toggle('active', mode === 'memorable');
+    document.getElementById('btnRandom').classList.toggle('active', mode === 'random');
+    document.getElementById('panelMemorable').classList.toggle('active', mode === 'memorable');
+    document.getElementById('panelRandom').classList.toggle('active', mode === 'random');
+    generatePassword();
+}
+
+function generateMemorable() {
+    const numWords = parseInt(numWordsInput.value) || 3;
     const capitalize = capitalizeInput.checked;
     const addNumber = addNumberInput.checked;
     const addSymbol = addSymbolInput.checked;
 
-    let passwordWords = [];
+    let words = [];
     for (let i = 0; i < numWords; i++) {
         let word = wordList[Math.floor(Math.random() * wordList.length)];
         if (capitalize) word = word.charAt(0).toUpperCase() + word.slice(1);
-        passwordWords.push(word);
+        words.push(word);
     }
 
-    let password = passwordWords.join("-");
-
-    if (addNumber) {
-        password += Math.floor(Math.random() * 100);
-    }
+    let pw = words.join("-");
+    if (addNumber) pw += Math.floor(Math.random() * 100);
     if (addSymbol) {
         const symbols = "!@#$%^&*";
-        password += symbols[Math.floor(Math.random() * symbols.length)];
+        pw += symbols[Math.floor(Math.random() * symbols.length)];
+    }
+    return pw;
+}
+
+function generateRandom() {
+    const length = Math.max(6, Math.min(64, parseInt(pwLengthInput.value) || 16));
+    const useUpper  = rndUpper.checked;
+    const useLower  = rndLower.checked;
+    const useNumber = rndNumber.checked;
+    const useSymbol = rndSymbol.checked;
+
+    const upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lower   = "abcdefghijklmnopqrstuvwxyz";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+
+    let charset = "";
+    let guaranteed = [];
+
+    if (useUpper)  { charset += upper;   guaranteed.push(upper[Math.floor(Math.random() * upper.length)]); }
+    if (useLower)  { charset += lower;   guaranteed.push(lower[Math.floor(Math.random() * lower.length)]); }
+    if (useNumber) { charset += numbers; guaranteed.push(numbers[Math.floor(Math.random() * numbers.length)]); }
+    if (useSymbol) { charset += symbols; guaranteed.push(symbols[Math.floor(Math.random() * symbols.length)]); }
+
+    if (!charset) { charset = lower; guaranteed = [lower[0]]; }
+
+    let pw = [...guaranteed];
+    const array = new Uint32Array(length - guaranteed.length);
+    crypto.getRandomValues(array);
+    for (let i = 0; i < array.length; i++) {
+        pw.push(charset[array[i] % charset.length]);
     }
 
-    passwordDiv.textContent = password;
-    updateStrength(password);
+    // Shuffle
+    for (let i = pw.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pw[i], pw[j]] = [pw[j], pw[i]];
+    }
+
+    return pw.join('');
+}
+
+function generatePassword() {
+    const pw = currentMode === 'memorable' ? generateMemorable() : generateRandom();
+    pwText.textContent = pw;
+    updateStrength(pw);
 }
 
 function copyPassword() {
-    const passwordText = passwordDiv.textContent;
-    if (passwordText) {
-        navigator.clipboard.writeText(passwordText).then(() => {
-            alert('Password copied to clipboard!');
-        });
-    }
+    const text = pwText.textContent;
+    if (!text || text === '—') return;
+    navigator.clipboard.writeText(text).then(() => {
+        const flash = document.getElementById('copiedFlash');
+        flash.classList.add('show');
+        setTimeout(() => flash.classList.remove('show'), 1800);
+    });
 }
 
 function updateStrength(password) {
@@ -267,31 +507,29 @@ function updateStrength(password) {
     if (/[a-z]/.test(password)) score++;
     if (/[A-Z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
-    if (/[!@#$%^&*]/.test(password)) score++;
-    let lengthFactor = Math.min(password.length / 20, 1);
-    let strength = (score / 4) * 100 * lengthFactor;
+    if (/[!@#$%^&*()\-_=+\[\]{}|;:,.<>?]/.test(password)) score++;
+    const lengthFactor = Math.min(password.length / 20, 1);
+    const strength = (score / 4) * 100 * lengthFactor;
 
     strengthBar.style.width = `${strength}%`;
-    let label = "";
     if (strength < 40) {
-        strengthBar.style.background = "red";
-        label = "Weak";
+        strengthBar.style.background = "#e74c3c";
+        strengthLabel.textContent = "Strength: Weak";
     } else if (strength < 70) {
-        strengthBar.style.background = "orange";
-        label = "Medium";
+        strengthBar.style.background = "#f39c12";
+        strengthLabel.textContent = "Strength: Medium";
     } else {
-        strengthBar.style.background = "green";
-        label = "Strong";
+        strengthBar.style.background = "#27ae60";
+        strengthLabel.textContent = "Strength: Strong";
     }
-    strengthLabel.textContent = `Strength: ${label}`;
 }
 
-// Live update
-[numWordsInput, capitalizeInput, addNumberInput, addSymbolInput].forEach(el => {
+// Live update on option changes
+[numWordsInput, capitalizeInput, addNumberInput, addSymbolInput,
+ pwLengthInput, rndUpper, rndLower, rndNumber, rndSymbol].forEach(el => {
     el.addEventListener('input', generatePassword);
 });
 
-// Initial password
 generatePassword();
 </script>
 

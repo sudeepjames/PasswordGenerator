@@ -2,7 +2,7 @@ This **Password Generator** is a secure, easy-to-use tool designed to help you c
 
 **Key Features:**
 
-  - Memorable Words: Generates passwords using simple, easy-to-remember words.
+  - Memorable and Random Passwords: Generates passwords using simple, easy-to-remember words or generate strong, unique passwords.
   - Numbers & Symbols: Optionally include numbers and special characters for extra security.
   - 100% Client-Side: All password generation happens in your browser — no data is sent to any server.
   - One-Click Copy: Instantly copy your password to the clipboard.
